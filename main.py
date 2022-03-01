@@ -38,7 +38,7 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound): 
         await sendmseg(ctx,2,mseg='**Command not found**',text='Click `help` to view tag list',view=sendhelp())
     else:
-        test = traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
+        # test = traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
         await sendmseg(ctx,4,mseg='An unexpected error was occur.',error=error)
 
 
@@ -59,6 +59,7 @@ async def sendmseg(user,types,mseg,text=None,delete=None,error=None,footer=None,
         embed.set_footer(text=footer)
     if error != None:
         view = senderror(error=error)
+        test = traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
     if back == False:
         if text == None:
             await user.send(embed=embed,delete_after=delete,view=view)
