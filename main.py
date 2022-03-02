@@ -102,6 +102,10 @@ class sendhelp(nextcord.ui.View):
         super().__init__()
         self.add_item(nextcord.ui.Button(label='help', url='https://gist.github.com/lmjaedentai/df357af611371d875ad35d150339640f#commands'))
 
+    @nextcord.ui.button(label='tags list', style=nextcord.ButtonStyle.grey, emoji='🖨️')
+    async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.response.send_message(self.error,files=['https://cdn.discordapp.com/attachments/893367501608599574/948523172523827200/unknown.png','https://cdn.discordapp.com/attachments/893367501608599574/948523172033077268/unknown.png','https://cdn.discordapp.com/attachments/893367501608599574/948523171680776232/unknown.png'], ephemeral=True)
+
 class senddiscard(nextcord.ui.View):
     def __init__(self,error):
         super().__init__()

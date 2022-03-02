@@ -63,7 +63,7 @@ class mod(commands.Cog):
         else:
             await sendmseg(ctx,1,f'**{amount} messages** was deleted')
 
-    @commands.command()
+    @commands.command(aliases=['diam'])
     async def mute(self,ctx, member: nextcord.Member,time=None,*, reason = None):
         time_convert = {"s":1, "m":60, "h":3600,"d":86400}
         if ctx.author.guild_permissions.kick_members == False:

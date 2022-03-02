@@ -43,7 +43,7 @@ class music(commands.Cog):
             ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
         await sendplayer(self,ctx,"Now Playing",player)
 
-    @commands.command()
+    @commands.command(aliases=['p'])
     async def play(self,ctx):
         await ctx.message.delete()
         global queue, loop
@@ -60,7 +60,7 @@ class music(commands.Cog):
         await sendplayer(self,ctx,"Now Playing",player)
 
     #QQ basic music command
-    @commands.command(aliases=['loop','loops'])
+    @commands.command(aliases=['loop','loops','l'])
     async def toggleloop(self,ctx):
         global loop
         if loop == False:
@@ -70,7 +70,7 @@ class music(commands.Cog):
             await sendmseg(ctx,1,'Loop is turn `off`')
             loop = False
 
-    @commands.command(aliases=['left','stop','diam'])
+    @commands.command(aliases=['left','stop'])
     async def leave(self,ctx):
         if ctx.voice_client is None:
             return await sendmseg(ctx,2,"You didnt join any voice channel")
@@ -81,7 +81,7 @@ class music(commands.Cog):
         ctx.voice_client.resume()
         await sendmseg(ctx,1,'**Resume** your music')
 
-    @commands.command()
+    @commands.command(aliases=['s'])
     async def pause(self,ctx):
         ctx.voice_client.pause()
         await ctx.message.delete()
@@ -98,7 +98,7 @@ class music(commands.Cog):
         else:
             await sendmseg(ctx,1,f"Changed volume to {volume}%")
 
-    @commands.command()
+    @commands.command(aliases=['a'])
     async def add(self,ctx, url):
         global queue
         try:
@@ -109,7 +109,7 @@ class music(commands.Cog):
             queue.append(url)
             await sendmseg(ctx,1,f'**[{title}]({url})** added to queue!')
 
-    @commands.command()
+    @commands.command(aliases=['r'])
     async def remove(self,ctx,number):
         global queue
         try:
