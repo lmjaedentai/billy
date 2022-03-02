@@ -27,7 +27,8 @@ class YTDLSource(nextcord.PCMVolumeTransformer):
         if 'entries' in data:
             data = data['entries'][0]
         filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(nextcord.FFmpegPCMAudio(filename,executable='./database/ffmpeg.exe', **ffmpeg_options), data=data)
+        # return cls(nextcord.FFmpegPCMAudio(filename,executable='./database/ffmpeg.exe', **ffmpeg_options), data=data)
+        return cls(nextcord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
 class music(commands.Cog):
@@ -86,12 +87,16 @@ class music(commands.Cog):
         await ctx.message.delete()
         await sendmseg(ctx,1,'**Paused**. Use `==resume` to unpause.')
 
-    @commands.command()
+    @commands.command(aliases=['v'])
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
             return await sendmseg(ctx,2,"Not connected to a voice channel.")
-        ctx.voice_client.source.volume = volume / 100
-        await sendmseg(ctx,2,f"Changed volume to {volume}%")
+        try:
+            ctx.voice_client.source.volume = volume / 100
+        except Exception as error: 
+            await sendmseg(ctx,4,error=error)
+        else:
+            await sendmseg(ctx,1,f"Changed volume to {volume}%")
 
     @commands.command()
     async def add(self,ctx, url):
