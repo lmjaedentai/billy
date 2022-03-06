@@ -16,7 +16,7 @@ from pytube import YouTube
 
 intents = nextcord.Intents.default()
 intents.members = True
-bot = commands.Bot(command_prefix=["!","-"], intents=intents,help_command=None)
+bot = commands.Bot(command_prefix=["==","-"], intents=intents,help_command=None)
 
 
 #QQ setup
@@ -25,7 +25,7 @@ async def on_ready():
     await bot.change_presence(activity = nextcord.Activity(name='Ukraine to glory',type=nextcord.ActivityType.watching),status = nextcord.Status.online)
     print('==========login==========')
     thread = bot.get_channel(936550091160956978)
-    await thread.send(f'\n__**login**__\ndevice: heroku\ntime: <t:{datetime.datetime.now()}:f>\nLatency: `{round(bot.latency * 1000)}`ms')
+    await thread.send(f'\n__**login**__\ndevice: heroku\ntime: <t:{round(datetime.datetime.now.timestamp)}:f>\nLatency: `{round(bot.latency * 1000)}`ms')
 
 @bot.event
 async def on_message(message):
