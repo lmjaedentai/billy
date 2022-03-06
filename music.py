@@ -92,22 +92,23 @@ class music(commands.Cog):
         if ctx.voice_client is None:
             return await sendmseg(ctx,2,"Not connected to a voice channel.")
         try:
-            ctx.voice_client.source.volume = volume / 100
+            ctx.voice_client.source.volume = volume / 100 
         except Exception as error: 
-            await sendmseg(ctx,4,error=error)
+            await sendmseg(ctx,4,error)
         else:
             await sendmseg(ctx,1,f"Changed volume to {volume}%")
 
     @commands.command(aliases=['a'])
     async def add(self,ctx, url):
+        await ctx.message.delete()
         global queue
         try:
             title = YouTube(url).title 
         except exceptions.RegexMatchError:
-            await sendmseg(ctx,2,'**Invalid url.** We only supported [Youtube](https://youtube.com) videos')
+            return await sendmseg(ctx,2,'**Invalid url.** We only supported [Youtube](https://youtube.com) videos')
         else: 
             queue.append(url)
-            await sendmseg(ctx,1,f'**[{title}]({url})** added to queue!')
+            await sendmseg(ctx,1,f'{ctx.author.mention} add **[{title}]({url})** to queue!')
 
     @commands.command(aliases=['r'])
     async def remove(self,ctx,number):
@@ -158,12 +159,12 @@ class music(commands.Cog):
 
 #QQ UI player
 async def sendplayer(self,ctx,status,player):  #system use this
-    embed=nextcord.Embed( description=f"[{player.title}]({player.url})", color=0x2f3136)
+    embed=nextcord.Embed(description=f"[{player.title}] ({player.data['webpage_url']})", color=0x2f3136)
     embed.set_thumbnail(url=player.data["thumbnail"])
     embed.set_author(name=status,icon_url=ctx.author.avatar.url)
-    await ctx.send(embed=embed,view=sendmusic(ctx)) 
+    await ctx.send(embed=embed,view=sendcontrol(ctx)) 
 
-class sendmusic(nextcord.ui.View):
+class sendcontrol(nextcord.ui.View):
     def __init__(self, ctx):
         super().__init__()
         self.ctx = ctx # You can use `self.ctx` anywhere in the class, like self.ctx.author

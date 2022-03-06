@@ -19,7 +19,7 @@ class mod(commands.Cog):
         except nextcord.Forbidden:
             await sendmseg(ctx,2,f'**Failed to kick {member.mention}**. No permission to kick admin')
         except Exception as error:
-            await sendmseg(ctx,4,error=error)
+            await sendmseg(ctx,4,error,'Failed to kick')
         else:
             if reason == None:
                 await sendmseg(ctx,1,f'**{member.mention}** was kicked')
@@ -36,7 +36,7 @@ class mod(commands.Cog):
         try:
             await channel.set_permissions(ctx.guild.default_role, send_messages=False)
         except Exception as error:
-            await sendmseg(ctx,4,error=error)
+            await sendmseg(ctx,4,error,'Failed to freeze the channel')
         else:
             sendmseg(channel,1,f'**{ctx.author.mention} freeze <#{channel.id}>. ** Members cant send message here now.')
         
@@ -59,7 +59,7 @@ class mod(commands.Cog):
                 async with ctx.channel.typing():
                     await ctx.channel.purge(limit=amount, check=lambda m: m.author == ctx.author)
         except Exception as error:
-            await sendmseg(ctx,4,f'**Failed to delete message**',error=error)
+            await sendmseg(ctx,4,error,'Failed to delete message')
         else:
             await sendmseg(ctx,1,f'**{amount} messages** was deleted')
 
@@ -72,14 +72,14 @@ class mod(commands.Cog):
         try:
             duration = int(time[0]) * time_convert[time[-1]]
         except (ValueError, KeyError,TypeError):
-            await sendmseg(ctx,2,f'Please input the **duration** to mute the member','To use this command, follow this:  `==mute` `@member` `time` `reason`\n\n**Time:**\n10 second: `10s`\n20 minutes: `20m`\n3 hours: `3h`\n4 days: `4d`\n\n**Example:**\n`==mute` `@tests` `2d` `staff disresepct`\n> I want to mute <@886833929145974794> for 2 days because he didnt respect mod')
+            await sendmseg(ctx,2,f'Please input the **duration** to mute the member','To use this command, follow this:  `==mute` `@member` `time` `reason`\n\n**Example:**\n`==mute` `@tests` `2d` `staff disresepct`\n> I want to mute <@886833929145974794> for 2 days because he didnt respect mod\n\n**Time:**\n10 second: `10s`\n20 minutes: `20m`\n3 hours: `3h`\n4 days: `4d`')
             return
         try:
             await member.edit(timeout=nextcord.utils.utcnow() + timedelta(seconds=duration))
         except nextcord.Forbidden:
             await sendmseg(ctx,2,'No permission to mute moderators')
         except Exception as error:
-            await sendmseg(ctx,4,error=error)
+            await sendmseg(ctx,4,error,'Failed to mute')
         else:
             await sendmseg(ctx,1,f'mute {member.mention} for {time}',reason)
 

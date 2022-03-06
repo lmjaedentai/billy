@@ -2,7 +2,7 @@ print('==========start==========') #QQ startup & import module
 import os 
 import sys
 import json
-import time
+import datetime
 import random
 import asyncio
 import traceback
@@ -16,16 +16,16 @@ from pytube import YouTube
 
 intents = nextcord.Intents.default()
 intents.members = True
-bot = commands.Bot(command_prefix=["==","-"], intents=intents,help_command=None)
+bot = commands.Bot(command_prefix=["!","-"], intents=intents,help_command=None)
 
 
 #QQ setup
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity = nextcord.Activity(name='Putin',type=nextcord.ActivityType.watching),status = nextcord.Status.online)
+    await bot.change_presence(activity = nextcord.Activity(name='Ukraine to glory',type=nextcord.ActivityType.watching),status = nextcord.Status.online)
     print('==========login==========')
     thread = bot.get_channel(936550091160956978)
-    await thread.send(f'\n__**login**__\ndevice: heroku\ntime: <t:{round(time.time())}:f>\nLatency: `{round(bot.latency * 1000)}`ms')
+    await thread.send(f'\n__**login**__\ndevice: heroku\ntime: <t:{datetime.datetime.now()}:f>\nLatency: `{round(bot.latency * 1000)}`ms')
 
 @bot.event
 async def on_message(message):
@@ -36,10 +36,10 @@ async def on_message(message):
 @bot.event 
 async def on_command_error(ctx, error): 
     if isinstance(error, commands.CommandNotFound): 
-        await sendmseg(ctx,2,mseg='**Command not found**',text='Click `help` to view tag list',view=sendhelp())
+        await sendmseg(ctx,2,mseg='**Command not found**',view=sendhelp())
     else:
         # test = traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
-        await sendmseg(ctx,4,mseg='An unexpected error was occur.',error=error)
+        await sendmseg(ctx,4,error)
 
 
 #QQ user def func
@@ -50,16 +50,20 @@ def readcsv(url):
         data = last2.split(",")
         return data
 
-async def sendmseg(user,types,mseg,text=None,delete=None,error=None,footer=None,view=None,back=False):
+async def sendmseg(user,types,mseg,text=None,delete=None,footer=None,view=None,back=False): #NOTE sendmseg is here lol
     element = [None, [None,nextcord.Color.green(),nextcord.Color.red(),nextcord.Color.blue(),nextcord.Color.orange()], [None,'<:check:903141744806346752>','<:cross:903141744919580692>', '<:info:903470117436928050>   ','<:error:903141745129320478> **error:**']]
     color = element[1][types]
     icon = element[2][types]
     embed = nextcord.Embed(description=f'{icon} {mseg}',color=color)
+
     if footer != None:
         embed.set_footer(text=footer)
-    if error != None:
-        view = senderror(error=error)
-        test = traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
+    if types == 4:
+        traceback.print_exception(type(mseg), mseg, mseg.__traceback__, file = sys.stderr)
+        fullerror = "".join(traceback.TracebackException.from_exception(mseg).format())
+        view = senderror(error=fullerror)
+        if text == None:
+            text = 'An unexpected error was occur.'
     if back == False:
         if text == None:
             await user.send(embed=embed,delete_after=delete,view=view)
@@ -70,9 +74,9 @@ async def sendmseg(user,types,mseg,text=None,delete=None,error=None,footer=None,
     if view != None:
         await view.wait()
 
-@bot.command() #lots of error handling here
+@bot.command() 
 async def err(ctx):
-    raise Exception(f'**this is an fake error from {ctx.author.mention}** by using `=err`')
+    raise Exception(f'fake error from {ctx.author.mention}')
 
 @bot.command() 
 async def ping(ctx):
@@ -84,7 +88,7 @@ async def shutdown(ctx):
         await sendmseg(ctx,2,'Only **bot developer** can use this command.')
     else:
         await sendmseg(ctx,1,'Shutting down...')
-        sys.exit(0)
+        sys.exit('Bot is shutdown by Jden')
 
 class senderror(nextcord.ui.View):
     def __init__(self,error):
@@ -94,7 +98,7 @@ class senderror(nextcord.ui.View):
 
     @nextcord.ui.button(label='print error', style=nextcord.ButtonStyle.grey, emoji='🖨️')
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_message(self.error, ephemeral=True)
+        await interaction.response.send_message(f'```py\n{self.error}```\nWe are sorry for the inconvenience caused. ', ephemeral=True)
         # self.stop()
 
 class sendhelp(nextcord.ui.View):
@@ -102,9 +106,9 @@ class sendhelp(nextcord.ui.View):
         super().__init__()
         self.add_item(nextcord.ui.Button(label='help', url='https://gist.github.com/lmjaedentai/df357af611371d875ad35d150339640f#commands'))
 
-    @nextcord.ui.button(label='tags list', style=nextcord.ButtonStyle.grey, emoji='🖨️')
+    @nextcord.ui.button(label='tags list', style=nextcord.ButtonStyle.grey)
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_message(self.error,files=['https://cdn.discordapp.com/attachments/893367501608599574/948523172523827200/unknown.png','https://cdn.discordapp.com/attachments/893367501608599574/948523172033077268/unknown.png','https://cdn.discordapp.com/attachments/893367501608599574/948523171680776232/unknown.png'], ephemeral=True)
+        await interaction.send('tips: `==commands` `[required]` `(optional)`',files=[nextcord.File('./database/tag1.png'),nextcord.File('./database/tag2.png'),nextcord.File('./database/tag3.png')], ephemeral=True)
 
 class senddiscard(nextcord.ui.View):
     def __init__(self,error):
@@ -257,6 +261,27 @@ async def youtube(interaction: Interaction, option=SlashOption(choices=['mp3 aud
     os.remove(music)
 
 
+
+
+@bot.command()
+async def remind(ctx, time=None, *, reminder=None):
+    time_convert = {"s":1, "m":60, "h":3600,"d":86400}
+    try:
+        seconds = int(time[0]) * time_convert[time[-1]]
+    except (ValueError, KeyError,TypeError):
+        await sendmseg(ctx,2,f'Please input the **duration** of reminder','To use this command, follow this:  `==reminder` `time` `remind`\n\n**Example:**\n`==reminder` `2d` `buy tomato`\n\n**Time:**\n10 second: `10s`\n20 minutes: `20m`\n3 hours: `3h`\n4 days: `4d`')
+        return
+    date = datetime.datetime.now() + datetime.timedelta(seconds = seconds)
+    date = round(date.timestamp())
+
+    if seconds <= 0:
+        await sendmseg(ctx,2,f'No zero or negative value')
+    elif seconds > 7776000:
+        await sendmseg(ctx,2,f'Maximum duration is 90 days.')
+    else:
+        await ctx.send(f"🔔 Alright, I will remind you **{reminder}** in **<t:{date}:R>** at **<t:{date}:f>**")#date.strftime('%d/%m/%Y %H:%M:%S')
+        await asyncio.sleep(seconds)
+    await ctx.send(ctx.author.mention,embed=nextcord.Embed(title=f'🔔 {reminder}', url=ctx.message.jump_url, description=f"set <t:{date}:R> ago.", color=nextcord.Colour.from_rgb(1,172,209)).set_thumbnail(url='https://i.giphy.com/media/FPXlaBYuo3IPKE1xvH/200.gif'))  ##f8a934
 
 
 #QQ cogs and run the bot
