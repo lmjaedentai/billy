@@ -7,12 +7,13 @@ import random
 import asyncio
 import traceback
 import urllib.request
-import nextcord  
-from nextcord.ext import commands 
-from nextcord import Interaction, SlashOption, ChannelType
 import mediawiki
 from mediawiki import MediaWiki
 from pytube import YouTube
+from PyMultiDictionary import MultiDictionary
+import nextcord  
+from nextcord.ext import commands 
+from nextcord import Interaction, SlashOption, ChannelType
 
 intents = nextcord.Intents.default()
 intents.members = True
@@ -25,12 +26,14 @@ async def on_ready():
     await bot.change_presence(activity = nextcord.Activity(name='Ukraine to glory',type=nextcord.ActivityType.watching),status = nextcord.Status.online)
     print('==========login==========')
     thread = bot.get_channel(936550091160956978)
-    await thread.send(f'\n__**login**__\ndevice: heroku\ntime: <t:{round(datetime.datetime.now.timestamp)}:f>\nLatency: `{round(bot.latency * 1000)}`ms')
+    await thread.send(f'\n__**login**__\ndevice: heroku\ntime: <t:{round(datetime.datetime.now().timestamp())}:f>\nLatency: `{round(bot.latency * 1000)}`ms')
 
 @bot.event
 async def on_message(message):
     if message.author.id == bot.user.id:
         return
+    if 'krunker' in message.content.lower():
+        await message.channel.send('Krunker!!!!!!')
     await bot.process_commands(message)
 
 @bot.event 
@@ -111,14 +114,22 @@ class sendhelp(nextcord.ui.View):
         await interaction.send('tips: `==commands` `[required]` `(optional)`',files=[nextcord.File('./database/tag1.png'),nextcord.File('./database/tag2.png'),nextcord.File('./database/tag3.png')], ephemeral=True)
 
 class senddiscard(nextcord.ui.View):
-    def __init__(self,error):
+    def __init__(self,base):
         super().__init__()
         self.value = None
-        self.error = error
+        self.base = base
 
-    @nextcord.ui.button(label='print error', style=nextcord.ButtonStyle.grey, emoji='🖨️')
-    async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_message(self.error, ephemeral=True)
+    @nextcord.ui.button(label='❌', style=nextcord.ButtonStyle.grey)
+    async def deletemseg(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        if interaction.user == self.base.user:
+            await self.base.delete_original_message()
+            self.disable()
+            self.stop()
+        else:
+            await interaction.send("This isn't for you!", ephemeral=True)
+    
+
+        
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -136,7 +147,7 @@ async def on_raw_reaction_add(payload):
 
 
 #QQ bot cmd
-@bot.slash_command(name='sk',description='Soul Knight Online Coop')
+@bot.slash_command(name='sk',description='Soul Knight Online Coop') 
 async def code(interaction: Interaction, code, comment=SlashOption(required=False)):
     output = ''
     for a in range(len(code)):
@@ -146,7 +157,7 @@ async def code(interaction: Interaction, code, comment=SlashOption(required=Fals
     embed=nextcord.Embed(description=f'code: {output}', color=0x2f3136)
     embed.set_author(name=f'Soul Knight Multiplayer', icon_url='https://i.imgur.com/2gQRdKN.png')
     embed.set_thumbnail(url='https://i.imgur.com/Xe6AbpC.png')
-    await interaction.send(f'<@&893367490736963604> {comment}',embed=embed)
+    await interaction.send(f'<@&893367490736963604> {comment}',embed=embed,view=senddiscard(interaction))
 
 @bot.slash_command(name='covid',description='check covid 19 statistic in Malaysia') 
 async def covid(interaction: Interaction):
@@ -178,7 +189,7 @@ async def wiki(interaction: Interaction,search):
             except:
                 None
         embed.set_thumbnail(url='https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Tango_style_Wikipedia_Icon.svg/1024px-Tango_style_Wikipedia_Icon.svg.png')
-    await interaction.send(embed=embed)
+    await interaction.send(embed=embed, view=senddiscard(interaction))
 
 @bot.slash_command(name='bombserver',description='Nuke it out')
 async def bombserver(interaction: Interaction):
@@ -198,7 +209,7 @@ async def bombserver(interaction: Interaction):
 
 @bot.slash_command(name='pl',description='lets join the vc')
 async def pl(interaction: Interaction,member : nextcord.Member):
-    await interaction.send(f'<#893367497389113394>  {member.mention}')
+    await interaction.send(f'<#893367497389113394>  {member.mention}',view=senddiscard(interaction))
 
 @bot.slash_command(name='clear',description='delete messages in chats')
 async def clear(interaction:Interaction, amount:int=SlashOption(description='How many messages you want to clear? Max is 200.'), member:nextcord.Member=SlashOption(required=False)):
@@ -231,8 +242,7 @@ async def searchfandom(interaction: Interaction,search):
             embed = nextcord.Embed(title=result.title, url=result.url, description=content,color=0x01e2b9)
             embed.set_footer(text="Adapted from soul-knight.fandom.com")
         embed.set_thumbnail(url='https://static.wikia.nocookie.net/soul-knight/images/8/8d/DrillMaster.png/revision/latest/scale-to-width-down/139?cb=20180712160915')
-    me = await interaction.send(embed=embed)
-    await me.add_reaction('❌')
+    me = await interaction.send(embed=embed,view=senddiscard(interaction))
 
 @bot.slash_command(name='华晨宇',description='治疗三部曲')
 async def huachenyu(interaction: Interaction):
@@ -260,28 +270,47 @@ async def youtube(interaction: Interaction, option=SlashOption(choices=['mp3 aud
     await interaction.send('Done downloading task. Remember to save.',file=nextcord.File(music),ephemeral=True)
     os.remove(music)
 
+@bot.slash_command(name='dictionary',description='define word in English or Malay.')
+async def dictionary(interaction: Interaction, language=SlashOption(choices=['english','malay']),* ,word):
+    dictionary = MultiDictionary()
+    if language == 'english':
+        lang = 'en'
+        link = f'https://www.oxfordlearnersdictionaries.com/definition/english/{word}'
+    elif language == 'malay':
+        lang = 'ms'
+        link = f'https://prpm.dbp.gov.my/cari1?keyword={word}'
+    rawresult = dictionary.meaning(lang, word)
+    if rawresult[1] != '':
+        if len(rawresult[1]) > 4095:
+            await interaction.send(f'Definisi **{word}** terlalu panjang. Anda boleh cari melalui kamus online.\n\n📕 Kamus Dewan: https://prpm.dbp.gov.my/cari1?keyword={word}\n🔎 ekamus (bc): https://www.ekamus.info/index.php/?a=srch&d=1&q={word}',ephemeral=True)
+            return 
+        await interaction.send(embed=nextcord.Embed(title=f'📘 **{word}**',description=rawresult[1], url=link,color=0x2f3136).set_footer(text="💡 tips: click the title's hyperlink to see completed definition on online dictionary"),view=senddiscard(interaction))
+    else:
+        await interaction.send(embed=await sendmseg(interaction.channel,2,f'**No search result** [Try Google.](https://www.google.com/search?q={word})'))
+        
 
-
-
-@bot.command()
-async def remind(ctx, time=None, *, reminder=None):
+@bot.slash_command(name='remind',description='Just a reminder. Dont forget.')
+async def remind(interaction: Interaction, time=SlashOption(description='Input 2m if you want 2 minutes'), reminder=SlashOption(description='What you want me to remind?'),private=SlashOption(required=False)):
     time_convert = {"s":1, "m":60, "h":3600,"d":86400}
     try:
         seconds = int(time[0]) * time_convert[time[-1]]
     except (ValueError, KeyError,TypeError):
-        await sendmseg(ctx,2,f'Please input the **duration** of reminder','To use this command, follow this:  `==reminder` `time` `remind`\n\n**Example:**\n`==reminder` `2d` `buy tomato`\n\n**Time:**\n10 second: `10s`\n20 minutes: `20m`\n3 hours: `3h`\n4 days: `4d`')
+        await interaction.send(f'To use this command, follow this:  `/remind` `time` `remind`\n\n**Example:**\n`/reminder` `2d` `buy tomato`\n\n**Time:**\n10 second: `10s`\n20 minutes: `20m`\n3 hours: `3h`\n4 days: `4d`',ephemeral=True)
         return
     date = datetime.datetime.now() + datetime.timedelta(seconds = seconds)
     date = round(date.timestamp())
 
     if seconds <= 0:
-        await sendmseg(ctx,2,f'No zero or negative value')
+        await interaction.send(embed=await sendmseg(interaction.channel,2,f'No zero or negative value'))
     elif seconds > 7776000:
-        await sendmseg(ctx,2,f'Maximum duration is 90 days.')
+        await interaction.send(embed=await sendmseg(interaction.channel,2,f'Maximum duration is 90 days.'))
     else:
-        await ctx.send(f"🔔 Alright, I will remind you **{reminder}** in **<t:{date}:R>** at **<t:{date}:f>**")#date.strftime('%d/%m/%Y %H:%M:%S')
+        await interaction.send(f"🔔 Alright, I will remind you **{reminder}** in **<t:{date}:R>** at **<t:{date}:f>**")
         await asyncio.sleep(seconds)
-    await ctx.send(ctx.author.mention,embed=nextcord.Embed(title=f'🔔 {reminder}', url=ctx.message.jump_url, description=f"set <t:{date}:R> ago.", color=nextcord.Colour.from_rgb(1,172,209)).set_thumbnail(url='https://i.giphy.com/media/FPXlaBYuo3IPKE1xvH/200.gif'))  ##f8a934
+    if private == True:
+        await interaction.user.send(interaction.user.mention,embed=nextcord.Embed(title=f'🔔 {reminder}',description=f"set <t:{date}:R> ago.", color=nextcord.Colour.from_rgb(1,172,209)).set_thumbnail(url='https://i.giphy.com/media/FPXlaBYuo3IPKE1xvH/200.gif'))  ##f8a934
+    else:
+        await interaction.channel.send(interaction.user.mention,embed=nextcord.Embed(title=f'🔔 {reminder}',description=f"set <t:{date}:R> ago.", color=nextcord.Colour.from_rgb(1,172,209)).set_thumbnail(url='https://i.giphy.com/media/FPXlaBYuo3IPKE1xvH/200.gif'),view=senddiscard(interaction))
 
 
 #QQ cogs and run the bot

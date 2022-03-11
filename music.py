@@ -1,4 +1,6 @@
 print('music extension')
+import re
+import urllib
 import asyncio
 import nextcord
 import youtube_dl
@@ -37,6 +39,16 @@ class music(commands.Cog):
 
     @commands.command(aliases=['music','i','m'])
     async def instant(self,ctx,url:str):
+        try:
+            YouTube(url).title 
+        except exceptions.RegexMatchError: #user input query not url
+            search_url = f"https://www.youtube.com/results?search_query=" + urllib.parse.quote(url,encoding='UTF-8')
+            html = urllib.request.urlopen(search_url)
+            vid = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+            if not vid:
+                return await sendmseg(ctx,2,'**Invalid query.** No search result from [Youtube](https://youtube.com)')
+            url = "https://www.youtube.com/watch?v=" + vid[0]
+
         await ctx.message.delete()
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
@@ -105,7 +117,15 @@ class music(commands.Cog):
         try:
             title = YouTube(url).title 
         except exceptions.RegexMatchError:
-            return await sendmseg(ctx,2,'**Invalid url.** We only supported [Youtube](https://youtube.com) videos')
+            # return await sendmseg(ctx,2,'**Invalid url.** We only supported [Youtube](https://youtube.com) videos')
+            query = url
+            search_url = f"https://www.youtube.com/results?search_query=" + urllib.parse.quote(url,encoding='UTF-8')
+            html = urllib.request.urlopen(search_url)
+            vid = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+            if not vid:
+                return await sendmseg(ctx,2,'**Invalid query.** No search result from [Youtube](https://youtube.com)')
+            queue.append("https://www.youtube.com/watch?v=" + vid[0])
+            await sendmseg(ctx,1,f'{ctx.author.mention} add **[{query}]({"https://www.youtube.com/watch?v=" + vid[0]})** to queue!')
         else: 
             queue.append(url)
             await sendmseg(ctx,1,f'{ctx.author.mention} add **[{title}]({url})** to queue!')
