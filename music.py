@@ -38,7 +38,7 @@ class music(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['music','i','m'])
-    async def instant(self,ctx,url:str):
+    async def instant(self,ctx,*,url:str):
         try:
             YouTube(url).title 
         except exceptions.RegexMatchError: #user input query not url
@@ -111,7 +111,7 @@ class music(commands.Cog):
             await sendmseg(ctx,1,f"Changed volume to {volume}%")
 
     @commands.command(aliases=['a'])
-    async def add(self,ctx, url):
+    async def add(self,ctx,*,url):
         await ctx.message.delete()
         global queue
         try:

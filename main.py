@@ -287,7 +287,6 @@ async def dictionary(interaction: Interaction, language=SlashOption(choices=['en
         await interaction.send(embed=nextcord.Embed(title=f'📘 **{word}**',description=rawresult[1], url=link,color=0x2f3136).set_footer(text="💡 tips: click the title's hyperlink to see completed definition on online dictionary"),view=senddiscard(interaction))
     else:
         await interaction.send(embed=await sendmseg(interaction.channel,2,f'**No search result** [Try Google.](https://www.google.com/search?q={word})'))
-        
 
 @bot.slash_command(name='remind',description='Just a reminder. Dont forget.')
 async def remind(interaction: Interaction, time=SlashOption(description='Input 2m if you want 2 minutes'), reminder=SlashOption(description='What you want me to remind?'),private=SlashOption(required=False)):
@@ -311,6 +310,7 @@ async def remind(interaction: Interaction, time=SlashOption(description='Input 2
         await interaction.user.send(interaction.user.mention,embed=nextcord.Embed(title=f'🔔 {reminder}',description=f"set <t:{date}:R> ago.", color=nextcord.Colour.from_rgb(1,172,209)).set_thumbnail(url='https://i.giphy.com/media/FPXlaBYuo3IPKE1xvH/200.gif'))  ##f8a934
     else:
         await interaction.channel.send(interaction.user.mention,embed=nextcord.Embed(title=f'🔔 {reminder}',description=f"set <t:{date}:R> ago.", color=nextcord.Colour.from_rgb(1,172,209)).set_thumbnail(url='https://i.giphy.com/media/FPXlaBYuo3IPKE1xvH/200.gif'),view=senddiscard(interaction))
+
 
 
 #QQ cogs and run the bot
