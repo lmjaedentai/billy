@@ -318,4 +318,4 @@ async def remind(interaction: Interaction, time=SlashOption(description='Input 2
 # keep_alive()
 bot.load_extension('music')
 bot.load_extension('mod')
-bot.run('ODg5Mzk1MTgyNzE2NDg1NjMy.YUgnzw.3pmDMY-cL9JIgmOyslszmV5ZQeg')
+bot.run(os.environ['token'])
