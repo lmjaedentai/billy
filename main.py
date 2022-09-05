@@ -292,7 +292,7 @@ async def dictionary(interaction: Interaction, language=SlashOption(choices=['en
 async def remind(interaction: Interaction, time=SlashOption(description='Input 2m if you want 2 minutes'), reminder=SlashOption(description='What you want me to remind?'),private=SlashOption(required=False)):
     time_convert = {"s":1, "m":60, "h":3600,"d":86400}
     try:
-        seconds = int(time[0]) * time_convert[time[-1]]
+        seconds = int(time[:-1]) * time_convert[time[-1]]
     except (ValueError, KeyError,TypeError):
         await interaction.send(f'To use this command, follow this:  `/remind` `time` `remind`\n\n**Example:**\n`/reminder` `2d` `buy tomato`\n\n**Time:**\n10 second: `10s`\n20 minutes: `20m`\n3 hours: `3h`\n4 days: `4d`',ephemeral=True)
         return
